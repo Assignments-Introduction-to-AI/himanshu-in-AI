@@ -1,20 +1,5 @@
 from expand import expand
 
-def validate_expand_function():
-    example_time_map = {
-        'A': {'B': 10, 'C': 5},
-        'B': {'D': 8},
-        'C': {'D': 2},
-        'D': {'E': 3},
-        'E': {}
-    }
-    example_node = 'A'
-    example_neighbors = expand(example_node, example_time_map)
-    if example_neighbors == ['B', 'C']:
-        print("Validator: expand function is correct")
-    else:
-        print("Validator: expand function is incorrect")
-
 def a_star_search(dis_map, time_map, start, end, heuristic):
     open_list = [(start, 0)]
     came_from = {}
