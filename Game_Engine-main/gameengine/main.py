@@ -1,6 +1,8 @@
-import sys, curses
+import sys, os, game_rules, curses, game_manager, signal
+import player
 
 class Display(object):
+    """"""
     def __init__(self, stdscr, manager):
         super(Display, self).__init__()
         self._stdscr = stdscr
@@ -10,7 +12,7 @@ class Display(object):
         self._cursor = self._start
         self._last = 0
 
-     self._p1state = self._p2state = None
+        self._p1state = self._p2state = None
         if isinstance(self._gm.p1, player.HumanPlayer): self._p1state = self.PlayerInputState()
         if isinstance(self._gm.p2, player.HumanPlayer): self._p2state = self.PlayerInputState()
 
@@ -152,8 +154,8 @@ def Loop(stdscr, p1, p2):
 
     gm = MakeBoard(p1, p2)
     display = Display(stdscr, gm)
-    while True:
-        display.Loop()
+    while True: display.Loop()
+
 
 if __name__ == '__main__':
     args = sys.argv
@@ -163,9 +165,7 @@ if __name__ == '__main__':
         p1 = str(args[1]).capitalize()
         p2 = str(args[2]).capitalize()
 
-    if p1 not in ['A', 'M', 'R', 'D', 'H']:
-        p1 = 'H'
-    if p2 not in ['A', 'M', 'R', 'D', 'H']:
-        p2 = 'R'
+    if p1 not in ['A', 'M', 'R', 'D', 'H']: p1 = 'H'
+    if p2 not in ['A', 'M', 'R', 'D', 'H']: p2 = 'R'
     
     curses.wrapper(Loop, p1, p2)

@@ -28,51 +28,43 @@ class Player(object):
 
 
 # This class has been replaced with the code for a deterministic player.
+# This class has been replaced with the code for a deterministic player.
 class MinimaxPlayer(Player):
-    def __init__(self, symbol, depth):
-        super(MinimaxPlayer, self).__init__(symbol)
-        self.depth=depth
+    def __init__(self, symbol, depth): super(MinimaxPlayer, self).__init__(symbol)
 
     # Leave these two functions alone.
-    def selectInitialX(self, board):
-        return (0,0)
+    def selectInitialX(self, board): return (0,0)
     def selectInitialO(self, board):
         validMoves = game_rules.getFirstMovesForO(board)
         return list(validMoves)[0]
-    
-    def minimax(self, board, depth, maximizing_player):
-        if depth == 0 or game_rules.isGameOver(board):
-            return self.evaluate(board)
-
-        if maximizing_player:
-            max_eval = float('-inf')
-            best_move = None
-            for move in game_rules.getLegalMoves(board, self.symbol):
-                new_board = game_rules.makeMove(board, self.symbol, move)
-                eval = self.minimax(new_board, depth - 1, False)
-                if eval >= max_eval:  # Use >= for consistency
-                    max_eval = eval
-                    best_move = move
-            return best_move  # Return only the best_move
-        else:
-            min_eval = float('inf')
-            best_move = None  # Initialize best_move here
-            for move in game_rules.getLegalMoves(board, game_rules.getOpponentSymbol(self.symbol)):
-                new_board = game_rules.makeMove(board, game_rules.getOpponentSymbol(self.symbol), move)
-                eval = self.minimax(new_board, depth - 1, True)
-                if eval <= min_eval:  # Use <= for consistency
-                    min_eval = eval
-                    best_move = move
-            return best_move  # Return only the best_move
 
     # Edit this one here. :)
-    def getMove(self, board):
-        legalMoves = game_rules.getLegalMoves(board, self.symbol)
-        if len(legalMoves) > 0:
-            best_move = self.minimax(board, self.depth, True)
-            return best_move
-        else:
-            return None
+def getMove(self, board):
+    move, val = self.minmax(board, self.symbol, self.depth)
+    return move
+
+def minmax(self, board, turn, depth):
+    legalMoves = game_rules.getLegalMoves(board, turn)
+    if depth <= 0 or len(legalMoves) < 1:
+        return None, self.h1(board, turn)
+
+    best_move = None
+    if turn == self.symbol:
+        best_val = NEG_INF
+    else:
+        best_val = POS_INF
+
+    for move in legalMoves:
+        next_board = game_rules.makeMove(board, move)
+        m, next_val = self.minmax(next_board, 'o' if turn == 'x' else 'x', depth-1)
+        if turn == self.symbol and next_val > best_val:
+            best_val = next_val
+            best_move = move
+        elif turn != self.symbol and next_val < best_val:
+            best_val = next_val
+            best_move = move
+
+    return best_move, best_val
 
 
 
@@ -87,10 +79,46 @@ class AlphaBetaPlayer(Player):
         return list(validMoves)[0]
 
     # Edit this one here. :)
-    def getMove(self, board):
-        legalMoves = game_rules.getLegalMoves(board, self.symbol)
-        if len(legalMoves) > 0: return legalMoves[0]
-        else: return None
+def getMove(self, board):
+    move, val = self.ab_max(board, self.symbol, NEG_INF, POS_INF, self.depth)
+    return move
+
+def ab_max(self, board, turn, alpha, beta, depth):
+    legal_moves = game_rules.getLegalMoves(board, turn)
+    if depth <= 0 or len(legal_moves) < 1:
+        return None, self.h1(board, turn)
+
+    best_move = None
+    opt = NEG_INF
+    for move in legal_moves:
+        next_board = game_rules.makeMove(board, move)
+        m, val = self.ab_min(next_board, 'o' if turn == 'x' else 'x', alpha, beta, depth-1)
+        if val > opt:
+            opt = val
+            best_move = move
+        alpha = max(alpha, opt)
+        if beta <= alpha:
+            break
+    return best_move, opt
+
+def ab_min(self, board, turn, alpha, beta, depth):
+    legal_moves = game_rules.getLegalMoves(board, turn)
+    if depth <= 0 or len(legal_moves) < 1:
+        return None, self.h1(board, turn)
+
+    best_move = None
+    opt = POS_INF
+    for move in legal_moves:
+        next_board = game_rules.makeMove(board, move)
+        m, val = self.ab_max(next_board, 'o' if turn == 'x' else 'x', alpha, beta, depth-1)
+        if val < opt:
+            opt = val
+            best_move = move
+        beta = min(beta,opt)
+        if beta <= alpha:
+            break
+    return best_move,opt
+
 
 
 class RandomPlayer(Player):
@@ -127,9 +155,9 @@ class DeterministicPlayer(Player):
 
 class HumanPlayer(Player):
     def __init__(self, symbol): super(HumanPlayer, self).__init__(symbol)
-    def selectInitialX(self, board): raise NotImplementedError('HumanPlayer functionality is handled externally.')
-    def selectInitialO(self, board): raise NotImplementedError('HumanPlayer functionality is handled externally.')
-    def getMove(self, board): raise NotImplementedError('HumanPlayer functionality is handled externally.')
+    def selectInitialX(self, board): raise NotImplementedException('HumanPlayer functionality is handled externally.')
+    def selectInitialO(self, board): raise NotImplementedException('HumanPlayer functionality is handled externally.')
+    def getMove(self, board): raise NotImplementedException('HumanPlayer functionality is handled externally.')
 
 
 def makePlayer(playerType, symbol, depth=1):
@@ -139,7 +167,7 @@ def makePlayer(playerType, symbol, depth=1):
     elif player == 'm': return MinimaxPlayer(symbol, depth)
     elif player == 'a': return AlphaBetaPlayer(symbol, depth)
     elif player == 'd': return DeterministicPlayer(symbol)
-    else: raise NotImplementedError('Unrecognized player type {}'.format(playerType))
+    else: raise NotImplementedException('Unrecognized player type {}'.format(playerType))
 
 def callMoveFunction(player, board):
     if game_rules.isInitialMove(board): return player.selectInitialX(board) if player.symbol == 'x' else player.selectInitialO(board)
